@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Indexing Results</title>
+</head>
+<body>
+    <h1>Indexing Results</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>URL</th>
+                <th>Status</th>
+                <th>Response</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+                <tr>
+                    <td>{{ result.url }}</td>
+                    <td>{{ result.status }}</td>
+                    <td>{{ result.response }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

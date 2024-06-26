@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Google Sheets Data Indexing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            padding: 50px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        #start-indexing {
+            background-color: #28a745;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #start-indexing:hover {
+            background-color: #218838;
+        }
+
+        #status {
+            margin-top: 20px;
+        }
+
+        table {
+            margin: 0 auto;
+            border-collapse: collapse;
+            width: 80%;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById('start-indexing').addEventListener('click', function() {
+                fetch('/indexing/')
+                    .then(response => response.json())
+                    .then(data => {
+                        const statusDiv = document.getElementById('status');
+                        statusDiv.innerHTML = '';  // Clear previous status
+                        
+                        // Overall summary
+                        const summary = document.createElement('div');
+                        summary.innerHTML = `
+                            <p>Total URLs Tried: ${data.total_urls_tried}</p>
+                            <p>Successful URLs: ${data.successful_urls}</p>
+                            <p>URLs with Error 429: ${data.urls_with_error_429}</p>
+                        `;
+                        statusDiv.appendChild(summary);
+
+                        data.accounts_data.forEach(accountData => {
+                            const accountHeader = document.createElement('h2');
+                            accountHeader.innerText = `Account ${accountData.account}`;
+                            statusDiv.appendChild(accountHeader);
+
+                            const accountSummary = document.createElement('p');
+                            accountSummary.innerHTML = `
+                                Total URLs Tried: ${accountData.total_urls_tried}<br>
+                                Successful URLs: ${accountData.successful_urls}<br>
+                                URLs with Error 429: ${accountData.urls_with_error_429}
+                            `;
+                            statusDiv.appendChild(accountSummary);
+
+                            const table = document.createElement('table');
+                            table.border = 1;
+
+                            const thead = document.createElement('thead');
+                            const headerRow = document.createElement('tr');
+                            const headers = ['URL', 'Status', 'Response'];
+                            headers.forEach(headerText => {
+                                const th = document.createElement('th');
+                                th.innerText = headerText;
+                                headerRow.appendChild(th);
+                            });
+                            thead.appendChild(headerRow);
+                            table.appendChild(thead);
+
+                            const tbody = document.createElement('tbody');
+                            accountData.results.forEach(result => {
+                                const row = document.createElement('tr');
+
+                                const urlCell = document.createElement('td');
+                                urlCell.innerText = result.url;
+                                row.appendChild(urlCell);
+
+                                const statusCell = document.createElement('td');
+                                statusCell.innerText = result.status;
+                                row.appendChild(statusCell);
+
+                                const responseCell = document.createElement('td');
+                                responseCell.innerText = result.response;
+                                row.appendChild(responseCell);
+
+                                tbody.appendChild(row);
+                            });
+                            table.appendChild(tbody);
+                            statusDiv.appendChild(table);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching data:', error);
+                        document.getElementById('status').innerText = 'Error fetching data. Check console for details.';
+                    });
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>Google Sheets Data Indexing</h1>
+    <button id="start-indexing">Start Indexing</button>
+    <div id="status">Status will be shown here.</div>
+</body>
+</html>
